@@ -10,12 +10,23 @@
 	"versions": [
 		{
 			"minFPPVersion": "9.0",
+			"maxFPPVersion": "9.999",
+			"branch": "main",
+			"sha": "",
+			"dependencies": {
+				"plugins": [],
+				"packages": [],
+				"scripts": []
+			}
+		},
+		{
+			"minFPPVersion": "10.0",
 			"maxFPPVersion": "0",
 			"branch": "main",
 			"sha": "",
 			"dependencies": {
 				"plugins": [],
-				"packages": ["php-curl"],
+				"packages": [],
 				"scripts": []
 			}
 		}
