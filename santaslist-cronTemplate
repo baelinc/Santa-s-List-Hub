@@ -1,0 +1,3 @@
+# Santa's List Hub - pulls fresh names from the hub on a schedule.
+# Regenerated automatically when the refresh interval is changed in Settings.
+*/2 * * * * fpp /usr/bin/php /home/fpp/media/plugins/fpp-plugin-santaslist/cron/pull.php >/dev/null 2>&1
