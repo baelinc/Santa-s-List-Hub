@@ -3,9 +3,9 @@
 	"name": "Santa's List Hub",
 	"author": "Johnathan Evans",
 	"description": "Displays your Santa's List Hub Naughty/Nice list on two pixel overlay zones: a one-panel label row (NICE/NAUGHTY) and a 3x2 panel grid that scrolls the names.",
-	"homeURL": "https://github.com/baelinc/Santa-s-List-Hub/fpp-plugin-santaslist",
-	"srcURL": "https://github.com/baelinc/Santa-s-List-Hub/fpp-plugin-santaslist.git",
-	"bugURL": "https://github.com/baelinc/Santa-s-List-Hub/fpp-plugin-santaslist/issues",
+	"homeURL": "https://github.com/baelinc/Santa-s-List-Hub",
+	"srcURL": "https://github.com/baelinc/Santa-s-List-Hub.git",
+	"bugURL": "https://github.com/baelinc/Santa-s-List-Hub/issues",
 	"allowUpdates": 1,
 	"versions": [
 		{
