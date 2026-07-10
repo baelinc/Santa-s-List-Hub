@@ -1,0 +1,23 @@
+{
+	"repoName": "fpp-plugin-santaslist",
+	"name": "Santa's List Hub",
+	"author": "You",
+	"description": "Displays your Santa's List Hub Naughty/Nice list on two pixel overlay zones: a one-panel label row (NICE/NAUGHTY) and a 3x2 panel grid that scrolls the names.",
+	"homeURL": "https://github.com/YOUR-GITHUB-USERNAME/fpp-plugin-santaslist",
+	"srcURL": "https://github.com/YOUR-GITHUB-USERNAME/fpp-plugin-santaslist.git",
+	"bugURL": "https://github.com/YOUR-GITHUB-USERNAME/fpp-plugin-santaslist/issues",
+	"allowUpdates": 1,
+	"versions": [
+		{
+			"minFPPVersion": "9.0",
+			"maxFPPVersion": "0",
+			"branch": "main",
+			"sha": "",
+			"dependencies": {
+				"plugins": [],
+				"packages": ["php-curl"],
+				"scripts": []
+			}
+		}
+	]
+}
