@@ -1,7 +1,7 @@
 {
 	"repoName": "fpp-plugin-santaslist",
 	"name": "Santa's List Hub",
-	"author": "You",
+	"author": "Johnathan Evans",
 	"description": "Displays your Santa's List Hub Naughty/Nice list on two pixel overlay zones: a one-panel label row (NICE/NAUGHTY) and a 3x2 panel grid that scrolls the names.",
 	"homeURL": "https://github.com/baelinc/Santa-s-List-Hub",
 	"srcURL": "https://github.com/baelinc/Santa-s-List-Hub.git",
