@@ -297,12 +297,14 @@
 			} else {
 				setConnectionPill('bad');
 				toast(res.error || 'Could not connect to the hub.', true);
+				if (res.debug) console.error('Santa\'s List Hub test-connection debug:', res.debug);
 			}
-		}).catch(function () {
+		}).catch(function (err) {
 			btn.disabled = false;
 			btn.textContent = 'Test connection';
 			setConnectionPill('bad');
-			toast('Could not reach the hub.', true);
+			toast('Could not reach the plugin API. Check the browser console for details.', true);
+			console.error('Santa\'s List Hub test-connection request failed:', err);
 		});
 	}
 

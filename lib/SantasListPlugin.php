@@ -165,6 +165,9 @@ class SantasListPlugin {
 	// ------------------------------------------------------------------
 
 	private function httpRequest($method, $url, $body = null, $timeout = 8) {
+		if (!function_exists('curl_init')) {
+			return array('ok' => false, 'error' => 'PHP curl extension is not available on this system.', 'http_code' => 0);
+		}
 		$ch = curl_init();
 		$headers = array('Accept: application/json');
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -173,6 +176,7 @@ class SantasListPlugin {
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
 		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		if ($body !== null) {
 			$headers[] = 'Content-Type: application/json';
 			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
@@ -182,10 +186,24 @@ class SantasListPlugin {
 		$response = curl_exec($ch);
 		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		$err = curl_error($ch);
+		$errno = curl_errno($ch);
 		curl_close($ch);
 
 		if ($response === false) {
-			return array('ok' => false, 'error' => "Connection failed: $err", 'http_code' => 0);
+			// errno 51/60/35 are all SSL/certificate-trust failures -- extremely
+			// common on Pi-based FPP images with an outdated ca-certificates
+			// package, and they fail identically no matter what URL/key you use.
+			if (in_array($errno, array(51, 60, 35))) {
+				return array('ok' => false, 'error' =>
+					"SSL certificate verification failed ($err). This usually means the CA certificate bundle on your FPP device is outdated. Try: sudo apt-get update && sudo apt-get install --reinstall ca-certificates",
+					'http_code' => 0, 'curl_errno' => $errno);
+			}
+			if (in_array($errno, array(6, 7))) {
+				return array('ok' => false, 'error' =>
+					"Could not reach that host ($err). Check the Hub URL and that this FPP device has network/DNS access to it.",
+					'http_code' => 0, 'curl_errno' => $errno);
+			}
+			return array('ok' => false, 'error' => "Connection failed: $err", 'http_code' => 0, 'curl_errno' => $errno);
 		}
 		$decoded = json_decode($response, true);
 		if ($httpCode >= 200 && $httpCode < 300) {

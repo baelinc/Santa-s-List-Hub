@@ -8,6 +8,30 @@
 
 require_once __DIR__ . '/lib/SantasListPlugin.php';
 
+/**
+ * Read a request param defensively. `param()` (Limonade) should have this
+ * already, but we fall back to $_POST/$_GET and a raw JSON-body re-parse so
+ * a request never silently comes through empty.
+ */
+function slhParam($key, $default = null) {
+	static $jsonBody = null;
+	if (function_exists('param')) {
+		$v = param($key);
+		if ($v !== null && $v !== '') return $v;
+	}
+	if (isset($_POST[$key]) && $_POST[$key] !== '') return $_POST[$key];
+	if (isset($_GET[$key]) && $_GET[$key] !== '') return $_GET[$key];
+
+	if ($jsonBody === null) {
+		$raw = file_get_contents('php://input');
+		$decoded = json_decode($raw, true);
+		$jsonBody = is_array($decoded) ? $decoded : array();
+	}
+	if (isset($jsonBody[$key]) && $jsonBody[$key] !== '') return $jsonBody[$key];
+
+	return $default;
+}
+
 function getEndpointsfpppluginsantaslist() {
 	$result = array();
 
@@ -70,17 +94,33 @@ function santaslistGetSettings() {
 // POST /api/plugin/fpp-plugin-santaslist/test-connection
 function santaslistTestConnection() {
 	$plugin = new SantasListPlugin();
-	$hubUrl = trim((string)param('hub_url'));
-	$apiKey = trim((string)param('api_key'));
+	$hubUrl = trim((string)slhParam('hub_url', ''));
+	$apiKey = trim((string)slhParam('api_key', ''));
 
 	// Support testing with the already-saved key (masked key sent back unchanged).
 	if ($apiKey === '' || strpos($apiKey, '*') !== false) {
 		$apiKey = $plugin->config['api_key'];
 	}
 
+	if ($hubUrl === '' || $apiKey === '') {
+		return json(array(
+			'ok' => false,
+			'error' => 'Hub URL and API key are both required.',
+			'debug' => array('received_hub_url' => $hubUrl, 'received_key_length' => strlen($apiKey)),
+		));
+	}
+
 	$res = $plugin->hubGetMeta($hubUrl, $apiKey);
 	if (!$res['ok']) {
-		return json(array('ok' => false, 'error' => $res['error']));
+		return json(array(
+			'ok' => false,
+			'error' => $res['error'],
+			'debug' => array(
+				'requested_url' => rtrim($hubUrl, '/') . '/api/v1/meta?key=' . str_repeat('*', max(0, strlen($apiKey) - 4)) . substr($apiKey, -4),
+				'http_code' => $res['http_code'] ?? null,
+				'curl_available' => function_exists('curl_init'),
+			),
+		));
 	}
 	return json(array('ok' => true, 'account' => $res['data']['account'] ?? $res['data']));
 }
@@ -103,7 +143,7 @@ function santaslistSaveSettings() {
 	);
 	$newConfig = array();
 	foreach ($allowed as $key) {
-		$v = param($key);
+		$v = slhParam($key);
 		if ($v !== null) $newConfig[$key] = $v;
 	}
 
