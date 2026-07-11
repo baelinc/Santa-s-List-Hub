@@ -139,8 +139,9 @@ function santaslistSaveSettings() {
 	$allowed = array(
 		'hub_url', 'api_key', 'mode', 'alternate_seconds', 'refresh_minutes',
 		'max_names', 'name_separator', 'no_names_message',
-		'panel_pixel_width', 'panel_pixel_height',
+		'top_panel_pixel_width', 'top_panel_pixel_height',
 		'top_panels_wide', 'top_panels_tall',
+		'bottom_panel_pixel_width', 'bottom_panel_pixel_height',
 		'bottom_panels_wide', 'bottom_panels_tall',
 		'top_model', 'top_font', 'top_font_size', 'top_anti_alias',
 		'nice_color', 'naughty_color',

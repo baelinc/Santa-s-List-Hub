@@ -80,10 +80,12 @@
 		$('#slh-api-key').value = cfg.api_key || '';
 		$('#slh-enabled').checked = !!cfg.enabled;
 
-		$('#slh-panel-w').value = cfg.panel_pixel_width || 64;
-		$('#slh-panel-h').value = cfg.panel_pixel_height || 32;
+		$('#slh-top-panel-w').value = cfg.top_panel_pixel_width || 64;
+		$('#slh-top-panel-h').value = cfg.top_panel_pixel_height || 32;
 		$('#slh-top-wide').value = cfg.top_panels_wide || 1;
 		$('#slh-top-tall').value = cfg.top_panels_tall || 1;
+		$('#slh-bottom-panel-w').value = cfg.bottom_panel_pixel_width || 64;
+		$('#slh-bottom-panel-h').value = cfg.bottom_panel_pixel_height || 32;
 		$('#slh-bottom-wide').value = cfg.bottom_panels_wide || 3;
 		$('#slh-bottom-tall').value = cfg.bottom_panels_tall || 2;
 
@@ -122,10 +124,12 @@
 			mode: mode,
 			alternate_seconds: parseInt($('#slh-alternate-seconds').value, 10) || 15,
 
-			panel_pixel_width: parseInt($('#slh-panel-w').value, 10) || 64,
-			panel_pixel_height: parseInt($('#slh-panel-h').value, 10) || 32,
+			top_panel_pixel_width: parseInt($('#slh-top-panel-w').value, 10) || 64,
+			top_panel_pixel_height: parseInt($('#slh-top-panel-h').value, 10) || 32,
 			top_panels_wide: parseInt($('#slh-top-wide').value, 10) || 1,
 			top_panels_tall: parseInt($('#slh-top-tall').value, 10) || 1,
+			bottom_panel_pixel_width: parseInt($('#slh-bottom-panel-w').value, 10) || 64,
+			bottom_panel_pixel_height: parseInt($('#slh-bottom-panel-h').value, 10) || 32,
 			bottom_panels_wide: parseInt($('#slh-bottom-wide').value, 10) || 3,
 			bottom_panels_tall: parseInt($('#slh-bottom-tall').value, 10) || 2,
 
@@ -165,10 +169,12 @@
 
 	function readPanelSpec() {
 		return {
-			pw: Math.max(1, parseInt($('#slh-panel-w').value, 10) || 64),
-			ph: Math.max(1, parseInt($('#slh-panel-h').value, 10) || 32),
+			topPw: Math.max(1, parseInt($('#slh-top-panel-w').value, 10) || 64),
+			topPh: Math.max(1, parseInt($('#slh-top-panel-h').value, 10) || 32),
 			topWide: Math.max(1, parseInt($('#slh-top-wide').value, 10) || 1),
 			topTall: Math.max(1, parseInt($('#slh-top-tall').value, 10) || 1),
+			bottomPw: Math.max(1, parseInt($('#slh-bottom-panel-w').value, 10) || 64),
+			bottomPh: Math.max(1, parseInt($('#slh-bottom-panel-h').value, 10) || 32),
 			bottomWide: Math.max(1, parseInt($('#slh-bottom-wide').value, 10) || 3),
 			bottomTall: Math.max(1, parseInt($('#slh-bottom-tall').value, 10) || 2)
 		};
@@ -199,8 +205,8 @@
 
 	function updateSchematic() {
 		var spec = readPanelSpec();
-		var topW = spec.pw * spec.topWide, topH = spec.ph * spec.topTall;
-		var bottomW = spec.pw * spec.bottomWide, bottomH = spec.ph * spec.bottomTall;
+		var topW = spec.topPw * spec.topWide, topH = spec.topPh * spec.topTall;
+		var bottomW = spec.bottomPw * spec.bottomWide, bottomH = spec.bottomPh * spec.bottomTall;
 
 		// Top zone box: fixed 160px width, height follows the real aspect ratio.
 		var top = $('#slh-schematic-top');
@@ -222,7 +228,7 @@
 		for (var i = 0; i < cellCount; i++) {
 			var cell = document.createElement('div');
 			cell.className = 'slh-panel-cell';
-			cell.style.aspectRatio = spec.pw + ' / ' + spec.ph;
+			cell.style.aspectRatio = spec.bottomPw + ' / ' + spec.bottomPh;
 			grid.appendChild(cell);
 		}
 
@@ -370,22 +376,37 @@
 
 		$('#slh-top-model').addEventListener('change', updateSchematic);
 		$('#slh-bottom-model').addEventListener('change', updateSchematic);
-		['#slh-panel-w', '#slh-panel-h', '#slh-top-wide', '#slh-top-tall', '#slh-bottom-wide', '#slh-bottom-tall'].forEach(function (sel) {
+		[
+			'#slh-top-panel-w', '#slh-top-panel-h', '#slh-top-wide', '#slh-top-tall',
+			'#slh-bottom-panel-w', '#slh-bottom-panel-h', '#slh-bottom-wide', '#slh-bottom-tall'
+		].forEach(function (sel) {
 			$(sel).addEventListener('input', updateSchematic);
 		});
+
+		function panelFieldsFor(target) {
+			return target === 'top'
+				? { w: $('#slh-top-panel-w'), h: $('#slh-top-panel-h') }
+				: { w: $('#slh-bottom-panel-w'), h: $('#slh-bottom-panel-h') };
+		}
+
 		$all('.slh-panel-preset:not(.slh-panel-rotate-btn)').forEach(function (btn) {
 			btn.addEventListener('click', function () {
-				$('#slh-panel-w').value = this.getAttribute('data-w');
-				$('#slh-panel-h').value = this.getAttribute('data-h');
+				var fields = panelFieldsFor(this.getAttribute('data-target'));
+				fields.w.value = this.getAttribute('data-w');
+				fields.h.value = this.getAttribute('data-h');
 				updateSchematic();
 			});
 		});
-		$('#slh-panel-rotate').addEventListener('click', function () {
-			var w = $('#slh-panel-w').value;
-			var h = $('#slh-panel-h').value;
-			$('#slh-panel-w').value = h;
-			$('#slh-panel-h').value = w;
-			updateSchematic();
+		$all('.slh-panel-rotate-btn').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var fields = panelFieldsFor(this.getAttribute('data-target'));
+				var w = parseInt(fields.w.value, 10) || 0;
+				var h = parseInt(fields.h.value, 10) || 0;
+				if (w <= 0 || h <= 0) return; // don't swap into a blank/invalid state
+				fields.w.value = h;
+				fields.h.value = w;
+				updateSchematic();
+			});
 		});
 		$('#slh-separator').addEventListener('input', updatePreviewText);
 		$('#slh-bottom-speed').addEventListener('input', function () {

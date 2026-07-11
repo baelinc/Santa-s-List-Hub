@@ -15,48 +15,9 @@
 
 	<div class="slh-top-grid">
 
-		<!-- Panel layout schematic -->
+		<!-- Panel layout schematic (live preview only -- inputs live in the Top/Bottom zone cards below) -->
 		<div class="slh-schematic">
-			<div class="slh-eyebrow">Step 1 &middot; Your panels</div>
-
-			<div class="slh-field-row" style="width:100%;">
-				<div class="slh-field">
-					<label for="slh-panel-w">Panel pixel width</label>
-					<input type="number" id="slh-panel-w" min="1" max="256">
-				</div>
-				<div class="slh-field">
-					<label for="slh-panel-h">Panel pixel height</label>
-					<input type="number" id="slh-panel-h" min="1" max="256">
-				</div>
-			</div>
-			<div class="slh-preview-toggle" style="margin-bottom:4px;">
-				<button type="button" class="slh-panel-preset" data-w="32" data-h="16">32&times;16</button>
-				<button type="button" class="slh-panel-preset" data-w="64" data-h="32">64&times;32</button>
-				<button type="button" class="slh-panel-preset" data-w="32" data-h="32">32&times;32</button>
-				<button type="button" class="slh-panel-preset" data-w="16" data-h="16">16&times;16</button>
-				<button type="button" id="slh-panel-rotate" class="slh-panel-preset slh-panel-rotate-btn" title="Swap width and height for portrait-mounted panels">&#8635; Rotate 90&deg;</button>
-			</div>
-
-			<div class="slh-field-row" style="width:100%;">
-				<div class="slh-field">
-					<label for="slh-top-wide">Top zone: panels wide</label>
-					<input type="number" id="slh-top-wide" min="1" max="20">
-				</div>
-				<div class="slh-field">
-					<label for="slh-top-tall">Top zone: panels tall</label>
-					<input type="number" id="slh-top-tall" min="1" max="20">
-				</div>
-			</div>
-			<div class="slh-field-row" style="width:100%;">
-				<div class="slh-field">
-					<label for="slh-bottom-wide">Bottom zone: panels wide</label>
-					<input type="number" id="slh-bottom-wide" min="1" max="20">
-				</div>
-				<div class="slh-field">
-					<label for="slh-bottom-tall">Bottom zone: panels tall</label>
-					<input type="number" id="slh-bottom-tall" min="1" max="20">
-				</div>
-			</div>
+			<div class="slh-eyebrow">Your panel layout</div>
 
 			<div class="slh-rig">
 				<div class="slh-zone-label" id="slh-schematic-top-label">1 panel wide &middot; 64&times;32</div>
@@ -74,7 +35,7 @@
 
 		<!-- Connect to hub -->
 		<div class="slh-card" style="margin-bottom:0;">
-			<div class="slh-eyebrow">Step 2</div>
+			<div class="slh-eyebrow">Step 1</div>
 			<h2>Connect to your hub</h2>
 			<p class="slh-hint">Find your API key on the Hub under Show Settings &rarr; Display Connections.</p>
 
@@ -125,6 +86,32 @@
 		<h2>Top zone &mdash; the label panel</h2>
 		<p class="slh-hint">Shows "NICE" or "NAUGHTY", color-coded, across your top zone (<span id="slh-top-hint-size">1 panel &middot; 64&times;32</span>).</p>
 
+		<div class="slh-field-row">
+			<div class="slh-field">
+				<label for="slh-top-panel-w">Panel pixel width</label>
+				<input type="number" id="slh-top-panel-w" min="1" max="256">
+			</div>
+			<div class="slh-field">
+				<label for="slh-top-panel-h">Panel pixel height</label>
+				<input type="number" id="slh-top-panel-h" min="1" max="256">
+			</div>
+			<div class="slh-field">
+				<label for="slh-top-wide">Panels wide</label>
+				<input type="number" id="slh-top-wide" min="1" max="20">
+			</div>
+			<div class="slh-field">
+				<label for="slh-top-tall">Panels tall</label>
+				<input type="number" id="slh-top-tall" min="1" max="20">
+			</div>
+		</div>
+		<div class="slh-preview-toggle" style="margin-bottom:14px; max-width:420px;">
+			<button type="button" class="slh-panel-preset" data-target="top" data-w="32" data-h="16">32&times;16</button>
+			<button type="button" class="slh-panel-preset" data-target="top" data-w="64" data-h="32">64&times;32</button>
+			<button type="button" class="slh-panel-preset" data-target="top" data-w="32" data-h="32">32&times;32</button>
+			<button type="button" class="slh-panel-preset" data-target="top" data-w="16" data-h="16">16&times;16</button>
+			<button type="button" class="slh-panel-preset slh-panel-rotate-btn" data-target="top" title="Swap width and height for a portrait-mounted panel">&#8635; Rotate 90&deg;</button>
+		</div>
+
 		<div class="slh-field">
 			<label for="slh-top-model">Overlay model</label>
 			<select id="slh-top-model"></select>
@@ -172,6 +159,32 @@
 		<div class="slh-eyebrow">Step 4</div>
 		<h2>Bottom zone &mdash; the names grid</h2>
 		<p class="slh-hint">Scrolls through the names on the current list across your bottom zone (<span id="slh-bottom-hint-size">3&times;2 panels &middot; 192&times;64</span>).</p>
+
+		<div class="slh-field-row">
+			<div class="slh-field">
+				<label for="slh-bottom-panel-w">Panel pixel width</label>
+				<input type="number" id="slh-bottom-panel-w" min="1" max="256">
+			</div>
+			<div class="slh-field">
+				<label for="slh-bottom-panel-h">Panel pixel height</label>
+				<input type="number" id="slh-bottom-panel-h" min="1" max="256">
+			</div>
+			<div class="slh-field">
+				<label for="slh-bottom-wide">Panels wide</label>
+				<input type="number" id="slh-bottom-wide" min="1" max="20">
+			</div>
+			<div class="slh-field">
+				<label for="slh-bottom-tall">Panels tall</label>
+				<input type="number" id="slh-bottom-tall" min="1" max="20">
+			</div>
+		</div>
+		<div class="slh-preview-toggle" style="margin-bottom:14px; max-width:420px;">
+			<button type="button" class="slh-panel-preset" data-target="bottom" data-w="32" data-h="16">32&times;16</button>
+			<button type="button" class="slh-panel-preset" data-target="bottom" data-w="64" data-h="32">64&times;32</button>
+			<button type="button" class="slh-panel-preset" data-target="bottom" data-w="32" data-h="32">32&times;32</button>
+			<button type="button" class="slh-panel-preset" data-target="bottom" data-w="16" data-h="16">16&times;16</button>
+			<button type="button" class="slh-panel-preset slh-panel-rotate-btn" data-target="bottom" title="Swap width and height for a portrait-mounted panel">&#8635; Rotate 90&deg;</button>
+		</div>
 
 		<div class="slh-field">
 			<label for="slh-bottom-model">Overlay model</label>

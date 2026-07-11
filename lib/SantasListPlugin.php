@@ -58,10 +58,15 @@ class SantasListPlugin {
 			// informational: FPP itself defines the real model size when
 			// it's created, this just lets the settings page tell you
 			// what size to make it, for any panel type / grid layout.
-			'panel_pixel_width'       => 64,
-			'panel_pixel_height'      => 32,
+			// Top and bottom zones get independent panel specs since the
+			// label panel and the names-grid panels are often different
+			// hardware (or mounted in a different orientation).
+			'top_panel_pixel_width'   => 64,
+			'top_panel_pixel_height'  => 32,
 			'top_panels_wide'         => 1,
 			'top_panels_tall'         => 1,
+			'bottom_panel_pixel_width' => 64,
+			'bottom_panel_pixel_height'=> 32,
 			'bottom_panels_wide'      => 3,
 			'bottom_panels_tall'      => 2,
 
@@ -83,13 +88,15 @@ class SantasListPlugin {
 		);
 	}
 
-	/** Computed pixel size of a zone from the panel spec: [width, height]. */
+	/** Computed pixel size of a zone from its own panel spec: [width, height]. */
 	public function zoneSize($zone) {
-		$pw = max(1, (int)$this->config['panel_pixel_width']);
-		$ph = max(1, (int)$this->config['panel_pixel_height']);
 		if ($zone === 'top') {
+			$pw = max(1, (int)$this->config['top_panel_pixel_width']);
+			$ph = max(1, (int)$this->config['top_panel_pixel_height']);
 			return array($pw * max(1, (int)$this->config['top_panels_wide']), $ph * max(1, (int)$this->config['top_panels_tall']));
 		}
+		$pw = max(1, (int)$this->config['bottom_panel_pixel_width']);
+		$ph = max(1, (int)$this->config['bottom_panel_pixel_height']);
 		return array($pw * max(1, (int)$this->config['bottom_panels_wide']), $ph * max(1, (int)$this->config['bottom_panels_tall']));
 	}
 

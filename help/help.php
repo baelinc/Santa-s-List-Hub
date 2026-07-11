@@ -8,9 +8,11 @@
 
 	<div class="slh-card">
 		<h2>1. Tell the plugin about your panels</h2>
-		<p class="slh-hint">On the Settings page, enter your panel's pixel size (e.g. 64&times;32) and how many
-			panels make up each zone. The plugin computes the exact resolution each overlay model needs to be
-			&mdash; this works for any panel type and any grid size, not just 64&times;32 or 3&times;2.</p>
+		<p class="slh-hint">On the Settings page, in each of the Top Zone and Bottom Zone cards, enter that
+			zone's panel pixel size (e.g. 64&times;32) and how many panels make up the zone. The two zones
+			are independent &mdash; your label panel and your names-grid panels can be different hardware or
+			mounted in different orientations. Use the <b>Rotate 90&deg;</b> button next to either zone's panel
+			size to swap width/height for a portrait-mounted panel, without affecting the other zone.</p>
 	</div>
 
 	<div class="slh-card">
