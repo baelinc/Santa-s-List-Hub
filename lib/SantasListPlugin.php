@@ -18,7 +18,7 @@ class SantasListPlugin {
 
 	public function __construct() {
 		$this->dirs = array(
-			'plugin'    => '/home/fpp/media/plugins/' . $this->pluginName . '/',
+			'plugin'    => dirname(__DIR__) . '/',   // this file lives in <plugin>/lib/, so the parent is the real plugin root, whatever it's named on disk
 			'data'      => '/home/fpp/media/plugindata/',
 			'logs'      => '/home/fpp/media/logs/',
 		);

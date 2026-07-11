@@ -13,9 +13,9 @@ and grid layout.
 
 ## Install
 
-1. Copy this folder to `/home/fpp/media/plugins/fpp-plugin-santaslist` on your FPP
-   device (or install it through FPP's Plugin Manager if you've published it to a
-   git repo — update the URLs in `pluginInfo.json` first).
+1. Copy this folder to `/home/fpp/media/plugins/` on your FPP device — **any
+   folder name works**, the plugin detects its own location automatically
+   (it no longer has to be named `fpp-plugin-santaslist` specifically).
 2. Reboot, or run `scripts/fpp_install.sh` manually, and restart `fppd`.
 
 ## Set up

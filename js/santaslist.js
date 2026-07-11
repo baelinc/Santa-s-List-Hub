@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	var API = '/api/plugin/fpp-plugin-santaslist/';
+	var API = '/api/plugin/' + (window.SLH_PLUGIN_NAME || 'fpp-plugin-santaslist') + '/';
 	var state = { models: [], fonts: [], modelsByName: {}, previewMode: 'nice' };
 
 	function $(sel, root) { return (root || document).querySelector(sel); }
@@ -321,6 +321,7 @@
 				refreshStatusBar();
 			} else {
 				toast(res.error || 'Could not save settings.', true);
+				if (res.debug) console.error('Santa\'s List Hub save-settings debug:', res.debug);
 			}
 		}).catch(function () {
 			btn.disabled = false;

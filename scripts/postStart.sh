@@ -4,8 +4,10 @@
 # fppd just (re)started, which clears overlay model state -- relaunch the
 # display daemon so the two zones get pushed again.
 
+PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
 php -r "
-require '/home/fpp/media/plugins/fpp-plugin-santaslist/lib/SantasListPlugin.php';
+require '${PLUGIN_DIR}/lib/SantasListPlugin.php';
 \$p = new SantasListPlugin();
 if (\$p->config['enabled']) {
 	\$p->startDaemon();

@@ -13,22 +13,29 @@ require_once __DIR__ . '/lib/SantasListPlugin.php';
  * already, but we fall back to $_POST/$_GET and a raw JSON-body re-parse so
  * a request never silently comes through empty.
  */
+$GLOBALS['__slh_raw_body'] = null;
+$GLOBALS['__slh_json_body'] = null;
+
+function slhRawBody() {
+	if ($GLOBALS['__slh_raw_body'] === null) {
+		$GLOBALS['__slh_raw_body'] = file_get_contents('php://input');
+		$decoded = json_decode($GLOBALS['__slh_raw_body'], true);
+		$GLOBALS['__slh_json_body'] = is_array($decoded) ? $decoded : array();
+	}
+	return $GLOBALS['__slh_raw_body'];
+}
+
 function slhParam($key, $default = null) {
-	static $jsonBody = null;
+	slhRawBody(); // ensure it's been read exactly once, before anything else touches php://input
 	if (function_exists('param')) {
 		$v = param($key);
 		if ($v !== null && $v !== '') return $v;
 	}
 	if (isset($_POST[$key]) && $_POST[$key] !== '') return $_POST[$key];
 	if (isset($_GET[$key]) && $_GET[$key] !== '') return $_GET[$key];
-
-	if ($jsonBody === null) {
-		$raw = file_get_contents('php://input');
-		$decoded = json_decode($raw, true);
-		$jsonBody = is_array($decoded) ? $decoded : array();
+	if (isset($GLOBALS['__slh_json_body'][$key]) && $GLOBALS['__slh_json_body'][$key] !== '') {
+		return $GLOBALS['__slh_json_body'][$key];
 	}
-	if (isset($jsonBody[$key]) && $jsonBody[$key] !== '') return $jsonBody[$key];
-
 	return $default;
 }
 
@@ -129,6 +136,11 @@ function santaslistTestConnection() {
 function santaslistSaveSettings() {
 	$plugin = new SantasListPlugin();
 
+	$rawBody = slhRawBody();
+	$plugin->log('save_settings: raw php://input = ' . var_export($rawBody, true));
+	$plugin->log('save_settings: $_POST = ' . var_export($_POST, true));
+	$plugin->log('save_settings: param("hub_url") = ' . var_export(function_exists('param') ? param('hub_url') : '(no param fn)', true));
+
 	$allowed = array(
 		'hub_url', 'api_key', 'mode', 'alternate_seconds', 'refresh_minutes',
 		'max_names', 'name_separator', 'no_names_message',
@@ -153,11 +165,17 @@ function santaslistSaveSettings() {
 		unset($newConfig['api_key']);
 	}
 
+	$plugin->log('save_settings: parsed newConfig hub_url=[' . ($newConfig['hub_url'] ?? 'MISSING') . '] api_key_len=' . strlen($newConfig['api_key'] ?? ''));
+
 	if (empty($newConfig['hub_url']) && empty($plugin->config['hub_url'])) {
-		return json(array('ok' => false, 'error' => 'Hub URL is required.'));
+		return json(array('ok' => false, 'error' => 'Hub URL is required.', 'debug' => array(
+			'raw_body' => $rawBody, 'post' => $_POST, 'parsed_hub_url' => $newConfig['hub_url'] ?? null,
+		)));
 	}
 	if (empty($newConfig['api_key']) && empty($plugin->config['api_key'])) {
-		return json(array('ok' => false, 'error' => 'API key is required.'));
+		return json(array('ok' => false, 'error' => 'API key is required.', 'debug' => array(
+			'raw_body' => $rawBody, 'post' => $_POST, 'parsed_api_key_present' => isset($newConfig['api_key']),
+		)));
 	}
 
 	$plugin->saveConfig($newConfig);

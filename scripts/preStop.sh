@@ -2,6 +2,8 @@
 
 # fpp-plugin-santaslist preStop script
 
-php -r "require '/home/fpp/media/plugins/fpp-plugin-santaslist/lib/SantasListPlugin.php'; \$p = new SantasListPlugin(); \$p->stopDaemon();" 2>/dev/null
+PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+php -r "require '${PLUGIN_DIR}/lib/SantasListPlugin.php'; \$p = new SantasListPlugin(); \$p->stopDaemon();" 2>/dev/null
 
 echo "Santa's List Hub PreStop complete."

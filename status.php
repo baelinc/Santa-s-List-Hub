@@ -1,3 +1,4 @@
+<script>window.SLH_PLUGIN_NAME = <?php echo json_encode(isset($pluginName) ? $pluginName : 'fpp-plugin-santaslist'); ?>;</script>
 <div class="slh-app">
 	<div class="slh-header">
 		<div class="slh-title">
@@ -36,7 +37,7 @@
 </div>
 <script>
 (function(){
-	var API = '/api/plugin/fpp-plugin-santaslist/';
+	var API = '/api/plugin/' + (window.SLH_PLUGIN_NAME || 'fpp-plugin-santaslist') + '/';
 	function apiGet(e){ return fetch(API+e,{credentials:'same-origin'}).then(function(r){return r.json();}); }
 	function apiPost(e,b){ return fetch(API+e,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(function(r){return r.json();}); }
 	function $(s){ return document.querySelector(s); }

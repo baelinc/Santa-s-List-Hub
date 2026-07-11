@@ -1,3 +1,4 @@
+<script>window.SLH_PLUGIN_NAME = <?php echo json_encode(isset($pluginName) ? $pluginName : 'fpp-plugin-santaslist'); ?>;</script>
 <div class="slh-app">
 
 	<div class="slh-header">
