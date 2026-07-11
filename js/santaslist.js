@@ -312,7 +312,7 @@
 		var btn = $('#slh-save-btn');
 		btn.disabled = true;
 		btn.textContent = 'Saving\u2026';
-		apiPost('settings', readFormToConfig()).then(function (res) {
+		apiPost('config', readFormToConfig()).then(function (res) {
 			btn.disabled = false;
 			btn.textContent = 'Save settings';
 			if (res.ok) {
@@ -353,7 +353,7 @@
 	document.addEventListener('DOMContentLoaded', function () {
 		if (!$('#slh-hub-url')) return; // not the settings page
 
-		apiGet('settings').then(function (cfg) {
+		apiGet('config').then(function (cfg) {
 			applyConfigToForm(cfg || {});
 			return loadModelsAndFonts(cfg || {});
 		}).then(function () {

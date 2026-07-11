@@ -45,9 +45,9 @@ function getEndpointsfpppluginsantaslist() {
 	array_push($result, array('method' => 'GET',  'endpoint' => 'status',          'callback' => 'santaslistStatus'));
 	array_push($result, array('method' => 'GET',  'endpoint' => 'models',          'callback' => 'santaslistModels'));
 	array_push($result, array('method' => 'GET',  'endpoint' => 'fonts',           'callback' => 'santaslistFonts'));
-	array_push($result, array('method' => 'GET',  'endpoint' => 'settings',        'callback' => 'santaslistGetSettings'));
+	array_push($result, array('method' => 'GET',  'endpoint' => 'config',          'callback' => 'santaslistGetSettings'));
 	array_push($result, array('method' => 'POST', 'endpoint' => 'test-connection', 'callback' => 'santaslistTestConnection'));
-	array_push($result, array('method' => 'POST', 'endpoint' => 'settings',        'callback' => 'santaslistSaveSettings'));
+	array_push($result, array('method' => 'POST', 'endpoint' => 'config',          'callback' => 'santaslistSaveSettings'));
 	array_push($result, array('method' => 'POST', 'endpoint' => 'refresh',         'callback' => 'santaslistRefresh'));
 
 	return $result;
@@ -136,11 +136,6 @@ function santaslistTestConnection() {
 function santaslistSaveSettings() {
 	$plugin = new SantasListPlugin();
 
-	$rawBody = slhRawBody();
-	$plugin->log('save_settings: raw php://input = ' . var_export($rawBody, true));
-	$plugin->log('save_settings: $_POST = ' . var_export($_POST, true));
-	$plugin->log('save_settings: param("hub_url") = ' . var_export(function_exists('param') ? param('hub_url') : '(no param fn)', true));
-
 	$allowed = array(
 		'hub_url', 'api_key', 'mode', 'alternate_seconds', 'refresh_minutes',
 		'max_names', 'name_separator', 'no_names_message',
@@ -165,17 +160,11 @@ function santaslistSaveSettings() {
 		unset($newConfig['api_key']);
 	}
 
-	$plugin->log('save_settings: parsed newConfig hub_url=[' . ($newConfig['hub_url'] ?? 'MISSING') . '] api_key_len=' . strlen($newConfig['api_key'] ?? ''));
-
 	if (empty($newConfig['hub_url']) && empty($plugin->config['hub_url'])) {
-		return json(array('ok' => false, 'error' => 'Hub URL is required.', 'debug' => array(
-			'raw_body' => $rawBody, 'post' => $_POST, 'parsed_hub_url' => $newConfig['hub_url'] ?? null,
-		)));
+		return json(array('ok' => false, 'error' => 'Hub URL is required.'));
 	}
 	if (empty($newConfig['api_key']) && empty($plugin->config['api_key'])) {
-		return json(array('ok' => false, 'error' => 'API key is required.', 'debug' => array(
-			'raw_body' => $rawBody, 'post' => $_POST, 'parsed_api_key_present' => isset($newConfig['api_key']),
-		)));
+		return json(array('ok' => false, 'error' => 'API key is required.'));
 	}
 
 	$plugin->saveConfig($newConfig);
