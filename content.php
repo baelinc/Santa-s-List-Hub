@@ -34,6 +34,7 @@
 				<button type="button" class="slh-panel-preset" data-w="64" data-h="32">64&times;32</button>
 				<button type="button" class="slh-panel-preset" data-w="32" data-h="32">32&times;32</button>
 				<button type="button" class="slh-panel-preset" data-w="16" data-h="16">16&times;16</button>
+				<button type="button" id="slh-panel-rotate" class="slh-panel-preset slh-panel-rotate-btn" title="Swap width and height for portrait-mounted panels">&#8635; Rotate 90&deg;</button>
 			</div>
 
 			<div class="slh-field-row" style="width:100%;">

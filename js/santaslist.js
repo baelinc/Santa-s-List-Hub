@@ -373,12 +373,19 @@
 		['#slh-panel-w', '#slh-panel-h', '#slh-top-wide', '#slh-top-tall', '#slh-bottom-wide', '#slh-bottom-tall'].forEach(function (sel) {
 			$(sel).addEventListener('input', updateSchematic);
 		});
-		$all('.slh-panel-preset').forEach(function (btn) {
+		$all('.slh-panel-preset:not(.slh-panel-rotate-btn)').forEach(function (btn) {
 			btn.addEventListener('click', function () {
 				$('#slh-panel-w').value = this.getAttribute('data-w');
 				$('#slh-panel-h').value = this.getAttribute('data-h');
 				updateSchematic();
 			});
+		});
+		$('#slh-panel-rotate').addEventListener('click', function () {
+			var w = $('#slh-panel-w').value;
+			var h = $('#slh-panel-h').value;
+			$('#slh-panel-w').value = h;
+			$('#slh-panel-h').value = w;
+			updateSchematic();
 		});
 		$('#slh-separator').addEventListener('input', updatePreviewText);
 		$('#slh-bottom-speed').addEventListener('input', function () {
