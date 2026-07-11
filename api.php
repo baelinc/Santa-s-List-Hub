@@ -147,6 +147,8 @@ function santaslistSaveSettings() {
 		'nice_color', 'naughty_color',
 		'bottom_model', 'bottom_font', 'bottom_font_size', 'bottom_anti_alias',
 		'bottom_text_color', 'bottom_position', 'bottom_pixels_per_second',
+		'bottom_display_style', 'bottom_list_align', 'bottom_list_mode',
+		'bottom_list_count', 'bottom_list_reverse',
 		'enabled',
 	);
 	$newConfig = array();

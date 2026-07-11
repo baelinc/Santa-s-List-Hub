@@ -209,38 +209,92 @@
 
 		<div class="slh-field-row">
 			<div class="slh-field">
-				<label for="slh-bottom-position">Scroll direction</label>
-				<select id="slh-bottom-position">
-					<option value="Right to Left">Right to left</option>
-					<option value="Left to Right">Left to right</option>
-					<option value="Bottom to Top">Bottom to top</option>
-					<option value="Top to Bottom">Top to bottom</option>
-					<option value="Center">Centered, no scroll</option>
-				</select>
-			</div>
-			<div class="slh-field">
-				<label for="slh-bottom-speed">Scroll speed <span id="slh-bottom-speed-out"></span></label>
-				<input type="range" id="slh-bottom-speed" min="5" max="150" step="1">
-			</div>
-			<div class="slh-field">
-				<label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--slh-text-muted); margin-top:20px;">
+				<label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--slh-text-muted);">
 					<input type="checkbox" id="slh-bottom-antialias" style="width:auto;"> Anti-alias text
 				</label>
-			</div>
-		</div>
-
-		<div class="slh-field-row">
-			<div class="slh-field">
-				<label for="slh-separator">Separator between names</label>
-				<input type="text" id="slh-separator" maxlength="6">
 			</div>
 			<div class="slh-field">
 				<label for="slh-no-names-message">Message when a list is empty</label>
 				<input type="text" id="slh-no-names-message" maxlength="80">
 			</div>
+			<div class="slh-field" id="slh-bottom-speed-field">
+				<label for="slh-bottom-speed">Scroll speed <span id="slh-bottom-speed-out"></span></label>
+				<input type="range" id="slh-bottom-speed" min="5" max="150" step="1">
+			</div>
 		</div>
 
-		<div class="slh-inline-note" id="slh-scroll-preview"></div>
+		<hr class="slh-divider" style="margin:14px 0;">
+
+		<div class="slh-mode-picker" style="grid-template-columns: 1fr 1fr;">
+			<label class="slh-mode-card">
+				<input type="radio" name="slh-bottom-style" value="ticker">
+				<div class="slh-mode-title">Scrolling ticker</div>
+				<div class="slh-mode-desc">All names on one line, scrolling sideways.</div>
+			</label>
+			<label class="slh-mode-card">
+				<input type="radio" name="slh-bottom-style" value="list">
+				<div class="slh-mode-title">Name list</div>
+				<div class="slh-mode-desc">One name per line, scrolling up or held still.</div>
+			</label>
+		</div>
+
+		<div id="slh-ticker-options">
+			<div class="slh-field-row">
+				<div class="slh-field">
+					<label for="slh-bottom-position">Scroll direction</label>
+					<select id="slh-bottom-position">
+						<option value="Right to Left">Right to left</option>
+						<option value="Left to Right">Left to right</option>
+						<option value="Bottom to Top">Bottom to top</option>
+						<option value="Top to Bottom">Top to bottom</option>
+						<option value="Center">Centered, no scroll</option>
+					</select>
+				</div>
+				<div class="slh-field">
+					<label for="slh-separator">Separator between names</label>
+					<input type="text" id="slh-separator" maxlength="6">
+				</div>
+			</div>
+			<div class="slh-inline-note" id="slh-scroll-preview"></div>
+		</div>
+
+		<div id="slh-list-options" style="display:none;">
+			<div class="slh-field-row">
+				<div class="slh-field">
+					<label for="slh-list-align">Alignment</label>
+					<select id="slh-list-align">
+						<option value="left">Left</option>
+						<option value="center">Center</option>
+						<option value="right">Right</option>
+					</select>
+				</div>
+				<div class="slh-field">
+					<label for="slh-list-mode">Motion</label>
+					<select id="slh-list-mode">
+						<option value="scroll">Scroll upward</option>
+						<option value="static">Stay still</option>
+					</select>
+				</div>
+				<div class="slh-field">
+					<label for="slh-list-count">Number of names to show</label>
+					<input type="number" id="slh-list-count" min="1" max="100">
+				</div>
+			</div>
+			<div class="slh-field-row">
+				<div class="slh-field">
+					<label for="slh-list-order">Order</label>
+					<select id="slh-list-order">
+						<option value="0">First name at top</option>
+						<option value="1">First name at bottom</option>
+					</select>
+				</div>
+			</div>
+			<div class="slh-inline-note">
+				This reflects the order your hub sends names in (currently alphabetical) &mdash; "newest at top/bottom"
+				needs the hub to also send a timestamp, which it doesn't yet. Ask about that if you want true newest-first ordering.
+			</div>
+			<div class="slh-inline-note" id="slh-list-preview" style="margin-top:8px;"></div>
+		</div>
 	</div>
 
 	<!-- Advanced -->

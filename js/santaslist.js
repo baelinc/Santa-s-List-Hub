@@ -108,6 +108,14 @@
 		$('#slh-separator').value = (cfg.name_separator || '').trim();
 		$('#slh-no-names-message').value = cfg.no_names_message || '';
 
+		$all('input[name="slh-bottom-style"]').forEach(function (r) { r.checked = (r.value === (cfg.bottom_display_style || 'ticker')); });
+		updateModeCardStyles();
+		toggleBottomStyleVisibility();
+		$('#slh-list-align').value = cfg.bottom_list_align || 'left';
+		$('#slh-list-mode').value = cfg.bottom_list_mode || 'scroll';
+		$('#slh-list-count').value = cfg.bottom_list_count || 8;
+		$('#slh-list-order').value = cfg.bottom_list_reverse ? '1' : '0';
+
 		$('#slh-refresh-minutes').value = cfg.refresh_minutes || 2;
 		$('#slh-max-names').value = cfg.max_names || 150;
 
@@ -150,6 +158,12 @@
 			name_separator: '     ' + ($('#slh-separator').value || '\u2022').trim() + '     ',
 			no_names_message: $('#slh-no-names-message').value || "Santa's still checking the list...",
 
+			bottom_display_style: (($('input[name="slh-bottom-style"]:checked') || {}).value) || 'ticker',
+			bottom_list_align: $('#slh-list-align').value,
+			bottom_list_mode: $('#slh-list-mode').value,
+			bottom_list_count: parseInt($('#slh-list-count').value, 10) || 8,
+			bottom_list_reverse: $('#slh-list-order').value === '1',
+
 			refresh_minutes: parseInt($('#slh-refresh-minutes').value, 10) || 2,
 			max_names: parseInt($('#slh-max-names').value, 10) || 150
 		};
@@ -165,6 +179,29 @@
 	function toggleAlternateSecondsVisibility() {
 		var mode = ($('.slh-mode-card input:checked') || {}).value;
 		$('#slh-alternate-seconds-field').style.display = (mode === 'alternate') ? '' : 'none';
+	}
+
+	function toggleBottomStyleVisibility() {
+		var style = (($('input[name="slh-bottom-style"]:checked') || {}).value) || 'ticker';
+		$('#slh-ticker-options').style.display = (style === 'ticker') ? '' : 'none';
+		$('#slh-list-options').style.display = (style === 'list') ? '' : 'none';
+
+		// Scroll speed only matters when something is actually scrolling.
+		var tickerScrolling = style === 'ticker' && $('#slh-bottom-position').value !== 'Center';
+		var listScrolling = style === 'list' && $('#slh-list-mode').value === 'scroll';
+		$('#slh-bottom-speed-field').style.display = (tickerScrolling || listScrolling) ? '' : 'none';
+
+		updateListPreview();
+	}
+
+	function updateListPreview() {
+		var names = ['Emma R.', 'Liam T.', 'Ava S.'];
+		var count = parseInt($('#slh-list-count').value, 10) || 8;
+		names = names.slice(0, count);
+		if ($('#slh-list-order').value === '1') names = names.slice().reverse();
+		var align = $('#slh-list-align').value;
+		var arrow = align === 'left' ? '\u2190' : (align === 'right' ? '\u2192' : '\u2194');
+		$('#slh-list-preview').textContent = arrow + ' ' + names.join('  /  ') + ' (' + align + ', one per line on the panel)';
 	}
 
 	function readPanelSpec() {
@@ -411,6 +448,21 @@
 		$('#slh-separator').addEventListener('input', updatePreviewText);
 		$('#slh-bottom-speed').addEventListener('input', function () {
 			$('#slh-bottom-speed-out').textContent = this.value + ' px/sec';
+		});
+
+		$all('input[name="slh-bottom-style"]').forEach(function (r) {
+			r.addEventListener('change', function () {
+				updateModeCardStyles();
+				toggleBottomStyleVisibility();
+			});
+		});
+		$('#slh-bottom-position').addEventListener('change', toggleBottomStyleVisibility);
+		['#slh-list-mode', '#slh-list-align', '#slh-list-count', '#slh-list-order'].forEach(function (sel) {
+			$(sel).addEventListener('change', function () {
+				toggleBottomStyleVisibility();
+				updateListPreview();
+			});
+			$(sel).addEventListener('input', updateListPreview);
 		});
 
 		$('#slh-preview-nice-btn').addEventListener('click', function () { state.previewMode = 'nice'; updateSchematic(); });

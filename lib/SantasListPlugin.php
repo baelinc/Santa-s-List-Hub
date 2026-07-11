@@ -83,6 +83,15 @@ class SantasListPlugin {
 			'bottom_text_color'       => '#F4EFE1',
 			'bottom_position'         => 'Right to Left',
 			'bottom_pixels_per_second'=> 40,
+
+			// Display style for the names zone: 'ticker' is the original
+			// single-line horizontally-scrolling behavior. 'list' shows one
+			// name per line with its own alignment/scroll/count/order options.
+			'bottom_display_style'    => 'ticker',
+			'bottom_list_align'       => 'left',      // left | center | right
+			'bottom_list_mode'        => 'scroll',    // scroll (upward) | static
+			'bottom_list_count'       => 8,
+			'bottom_list_reverse'     => false,        // flips whatever order the hub sends
 			'enabled'                 => false,
 			'anchor_epoch'            => null,
 		);
@@ -347,12 +356,9 @@ class SantasListPlugin {
 		return $period - ($elapsed % $period);
 	}
 
-	public function buildNameString($listType, $cache) {
+	/** Formatted "First L." strings in whatever order the hub sent them. */
+	public function nameParts($listType, $cache) {
 		$names = $cache[$listType] ?? array();
-		if (empty($names)) {
-			return $this->config['no_names_message'];
-		}
-		$sep = $this->config['name_separator'];
 		$parts = array();
 		foreach ($names as $n) {
 			$first = trim($n['first_name'] ?? '');
@@ -360,10 +366,52 @@ class SantasListPlugin {
 			if ($first === '') continue;
 			$parts[] = $last !== '' ? "$first $last." : $first;
 		}
+		return $parts;
+	}
+
+	/** Original single-line, horizontally-scrolling ticker text. */
+	public function buildTickerString($listType, $cache) {
+		$parts = $this->nameParts($listType, $cache);
 		if (empty($parts)) {
 			return $this->config['no_names_message'];
 		}
-		return implode($sep, $parts);
+		return implode($this->config['name_separator'], $parts);
+	}
+
+	/**
+	 * One name per line, capped to bottom_list_count, optionally reversed,
+	 * with left/right alignment faked via space-padding (FPP's text
+	 * renderer always center-gravity's multi-line text, so equal-length
+	 * padded lines is how flush-left/flush-right gets approximated).
+	 */
+	public function buildListText($listType, $cache) {
+		$parts = $this->nameParts($listType, $cache);
+		if (empty($parts)) {
+			return $this->config['no_names_message'];
+		}
+
+		$count = max(1, (int)$this->config['bottom_list_count']);
+		$parts = array_slice($parts, 0, $count);
+		if (!empty($this->config['bottom_list_reverse'])) {
+			$parts = array_reverse($parts);
+		}
+
+		$align = $this->config['bottom_list_align'];
+		if ($align === 'left' || $align === 'right') {
+			$strlenFn = function_exists('mb_strlen') ? 'mb_strlen' : 'strlen';
+			$maxLen = 0;
+			foreach ($parts as $p) $maxLen = max($maxLen, $strlenFn($p));
+			foreach ($parts as &$p) {
+				$pad = $maxLen - $strlenFn($p);
+				if ($pad > 0) {
+					$p = $align === 'left' ? ($p . str_repeat(' ', $pad)) : (str_repeat(' ', $pad) . $p);
+				}
+			}
+			unset($p);
+		}
+		// 'center' needs no padding -- FPP centers each line within the block natively.
+
+		return implode("\n", $parts);
 	}
 
 	/** Push the given list type to both overlay zones. */
@@ -383,12 +431,19 @@ class SantasListPlugin {
 		}
 
 		if ($this->config['bottom_model']) {
-			$message = $this->buildNameString($listType, $cache);
+			if ($this->config['bottom_display_style'] === 'list') {
+				$message = $this->buildListText($listType, $cache);
+				$position = ($this->config['bottom_list_mode'] === 'static') ? 'Center' : 'Bottom to Top';
+				$pps = ($this->config['bottom_list_mode'] === 'static') ? 0 : $this->config['bottom_pixels_per_second'];
+			} else {
+				$message = $this->buildTickerString($listType, $cache);
+				$position = $this->config['bottom_position'];
+				$pps = $this->config['bottom_pixels_per_second'];
+			}
 			$this->setOverlayText(
 				$this->config['bottom_model'], $message, $this->config['bottom_text_color'],
 				$this->config['bottom_font'], $this->config['bottom_font_size'],
-				$this->config['bottom_position'], $this->config['bottom_pixels_per_second'],
-				$this->config['bottom_anti_alias']
+				$position, $pps, $this->config['bottom_anti_alias']
 			);
 			$this->setOverlayState($this->config['bottom_model'], 1);
 		}
