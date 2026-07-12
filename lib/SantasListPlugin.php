@@ -15,6 +15,7 @@ class SantasListPlugin {
 
 	const NICE = 'nice';
 	const NAUGHTY = 'naughty';
+	const KEEPALIVE_PLAYLIST = 'SantasListKeepAlive';
 
 	public function __construct() {
 		$this->dirs = array(
@@ -93,6 +94,7 @@ class SantasListPlugin {
 			'bottom_list_count'       => 8,
 			'bottom_list_reverse'     => false,        // flips whatever order the hub sends
 			'enabled'                 => false,
+			'keep_alive_enabled'      => true,
 			'anchor_epoch'            => null,
 		);
 	}
@@ -308,6 +310,45 @@ class SantasListPlugin {
 	public function listOverlayFonts() {
 		$res = $this->httpRequest('GET', $this->localApiBase() . '/overlays/fonts', null, 4);
 		return $res['ok'] ? $res['data'] : array();
+	}
+
+	/** Current fppd status ('idle', 'playing', 'paused', ...), or null if it couldn't be read. */
+	public function fppdStatusName() {
+		$res = $this->httpRequest('GET', $this->localApiBase() . '/fppd/status', null, 4);
+		if (!$res['ok'] || !is_array($res['data'])) return null;
+		return $res['data']['status_name'] ?? null;
+	}
+
+	/**
+	 * Pixel overlays only render on top of active output -- FPP produces no
+	 * frames at all while idle, so the overlay never appears. If nothing is
+	 * playing, start a minimal looping "pause" playlist (creating it once if
+	 * needed) purely to keep fppd actively outputting. If something else is
+	 * already playing, this does nothing, so it never interrupts a real show.
+	 */
+	public function ensureKeepAlivePlaylist() {
+		if (empty($this->config['keep_alive_enabled'])) return;
+
+		$status = $this->fppdStatusName();
+		if ($status === null) return; // couldn't reach fppd, don't guess
+		if ($status !== 'idle') return; // something is already playing -- leave it alone
+
+		$name = self::KEEPALIVE_PLAYLIST;
+		$check = $this->httpRequest('GET', $this->localApiBase() . '/playlist/' . rawurlencode($name), null, 4);
+		if (!$check['ok']) {
+			$playlist = array(
+				'name' => $name,
+				'mainPlaylist' => array(
+					array('type' => 'pause', 'enabled' => 1, 'playOnce' => 0, 'duration' => 3600),
+				),
+				'playlistInfo' => array('total_duration' => 3600, 'total_items' => 1),
+			);
+			$this->httpRequest('POST', $this->localApiBase() . '/playlist/' . rawurlencode($name), $playlist, 5);
+			$this->log('Created keep-alive playlist so overlays have something to render onto while idle.');
+		}
+
+		$this->httpRequest('GET', $this->localApiBase() . '/playlist/' . rawurlencode($name) . '/start/1', null, 5);
+		$this->log('fppd was idle -- started keep-alive playlist.');
 	}
 
 	private function setOverlayText($model, $message, $color, $font, $fontSize, $position, $pixelsPerSecond, $antiAlias) {

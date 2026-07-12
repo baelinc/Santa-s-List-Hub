@@ -149,7 +149,7 @@ function santaslistSaveSettings() {
 		'bottom_text_color', 'bottom_position', 'bottom_pixels_per_second',
 		'bottom_display_style', 'bottom_list_align', 'bottom_list_mode',
 		'bottom_list_count', 'bottom_list_reverse',
-		'enabled',
+		'enabled', 'keep_alive_enabled',
 	);
 	$newConfig = array();
 	foreach ($allowed as $key) {
@@ -176,6 +176,7 @@ function santaslistSaveSettings() {
 	$cache = $plugin->pullNames();
 
 	if ($plugin->config['enabled']) {
+		$plugin->ensureKeepAlivePlaylist();
 		$plugin->startDaemon();
 	} else {
 		$plugin->stopDaemon();
@@ -199,6 +200,7 @@ function santaslistRefresh() {
 		return json(array('ok' => false, 'error' => $state['last_error'] ?? 'Unable to reach the hub.'));
 	}
 	if ($plugin->config['enabled']) {
+		$plugin->ensureKeepAlivePlaylist();
 		$plugin->pushDisplay($plugin->currentListType(), $cache);
 	}
 	return json(array('ok' => true, 'cache' => $cache));

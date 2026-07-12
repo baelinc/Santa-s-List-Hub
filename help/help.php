@@ -33,6 +33,29 @@
 	</div>
 
 	<div class="slh-card">
+		<h2>Scheduling it alongside your other pixels</h2>
+		<p class="slh-hint">If this Pi also drives other pixel outputs (a prop, a matrix, etc.), you don't need to
+			do anything differently for those &mdash; schedule your regular sequences/playlists in FPP's Scheduler
+			exactly as you always have. This plugin only ever fills in the gaps when FPP is otherwise idle, and
+			steps aside the instant something else starts playing.</p>
+		<p class="slh-hint">To turn the Naughty/Nice display itself on and off on a schedule, use FPP's Scheduler
+			with a <b>Run Script</b> command, and pick <code>santaslist-enable.sh</code> or
+			<code>santaslist-disable.sh</code> &mdash; installing this plugin adds both to FPP's script list
+			automatically. Add two Scheduler entries (e.g. enable at 6pm, disable at 10pm) the same way you'd
+			schedule any playlist. If you don't see them in the picker, re-run this plugin's install
+			(<code>scripts/fpp_install.sh</code>) and restart fppd.</p>
+	</div>
+
+	<div class="slh-card">
+		<h2>Why is my panel blank even though the plugin says it's connected?</h2>
+		<p class="slh-hint">Pixel overlays only render on top of <i>active</i> output &mdash; if FPP is sitting idle
+			(not playing any sequence, playlist, or effect), there's nothing for the overlay to draw onto, even
+			though everything else is working correctly. By default this plugin auto-starts a minimal looping blank
+			playlist whenever it detects FPP is idle, so this shouldn't come up &mdash; but if you've turned off
+			"Keep FPP actively playing" in Settings, you'll need to keep something else playing yourself.</p>
+	</div>
+
+	<div class="slh-card">
 		<h2>How it stays in sync</h2>
 		<p class="slh-hint">
 			A background process checks the hub for new names on the schedule you set under Advanced (every 1&ndash;10 minutes),

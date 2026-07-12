@@ -324,10 +324,23 @@
 		<div class="slh-toggle-row">
 			<div>
 				<h2 style="margin-bottom:2px;">Display enabled</h2>
-				<p class="slh-hint" style="margin:0;">Turn this off to blank both zones without losing your settings.</p>
+				<p class="slh-hint" style="margin:0;">Turn this off to blank both zones without losing your settings.
+					Can also be scheduled: FPP Scheduler &rarr; Run Script &rarr; santaslist-enable.sh / santaslist-disable.sh.</p>
 			</div>
 			<label class="slh-switch">
 				<input type="checkbox" id="slh-enabled">
+				<span class="slh-switch-track"></span>
+			</label>
+		</div>
+		<div class="slh-toggle-row" style="margin-top:14px;">
+			<div>
+				<h2 style="margin-bottom:2px;">Keep FPP actively playing</h2>
+				<p class="slh-hint" style="margin:0;">Overlays only render on top of active output. If FPP is ever sitting idle, this
+					auto-starts a minimal looping blank playlist so your panels stay lit. It never touches anything if a real
+					playlist or sequence is already playing.</p>
+			</div>
+			<label class="slh-switch">
+				<input type="checkbox" id="slh-keep-alive">
 				<span class="slh-switch-track"></span>
 			</label>
 		</div>

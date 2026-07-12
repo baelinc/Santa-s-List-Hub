@@ -17,6 +17,7 @@ $plugin = new SantasListPlugin();
 $plugin->log('Display daemon starting.');
 
 $lastPushedList = null;
+$lastKeepAliveCheck = 0;
 
 while (true) {
 	// Reload config each loop so changes saved from the settings page take
@@ -26,6 +27,14 @@ while (true) {
 	if (!$plugin->config['enabled'] || (!$plugin->config['top_model'] && !$plugin->config['bottom_model'])) {
 		sleep(5);
 		continue;
+	}
+
+	// Overlays only render on top of active output, so make sure fppd isn't
+	// sitting idle. Throttled -- this only needs occasional checking, not
+	// every loop iteration.
+	if (time() - $lastKeepAliveCheck >= 30) {
+		$plugin->ensureKeepAlivePlaylist();
+		$lastKeepAliveCheck = time();
 	}
 
 	$listType = $plugin->currentListType();

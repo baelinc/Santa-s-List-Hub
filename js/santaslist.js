@@ -79,6 +79,7 @@
 		$('#slh-hub-url').value = cfg.hub_url || '';
 		$('#slh-api-key').value = cfg.api_key || '';
 		$('#slh-enabled').checked = !!cfg.enabled;
+		$('#slh-keep-alive').checked = cfg.keep_alive_enabled !== false;
 
 		$('#slh-top-panel-w').value = cfg.top_panel_pixel_width || 64;
 		$('#slh-top-panel-h').value = cfg.top_panel_pixel_height || 32;
@@ -129,6 +130,7 @@
 			hub_url: $('#slh-hub-url').value.trim(),
 			api_key: $('#slh-api-key').value.trim(),
 			enabled: $('#slh-enabled').checked,
+			keep_alive_enabled: $('#slh-keep-alive').checked,
 			mode: mode,
 			alternate_seconds: parseInt($('#slh-alternate-seconds').value, 10) || 15,
 
