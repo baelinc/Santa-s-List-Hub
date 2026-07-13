@@ -224,8 +224,16 @@ class SantasListPlugin {
 			return array('ok' => false, 'error' => "Connection failed: $err", 'http_code' => 0, 'curl_errno' => $errno);
 		}
 		$decoded = json_decode($response, true);
-		if ($httpCode >= 200 && $httpCode < 300) {
+		$looksLikeFatalError = (strpos($response, 'Fatal error') !== false) || (strpos($response, '<b>Fatal error</b>') !== false);
+		if ($httpCode >= 200 && $httpCode < 300 && !$looksLikeFatalError) {
 			return array('ok' => true, 'data' => (is_array($decoded) ? $decoded : $response), 'http_code' => $httpCode);
+		}
+		if ($looksLikeFatalError) {
+			// A PHP fatal error can still come back with HTTP 200, so status
+			// code alone isn't reliable -- surface a useful snippet instead
+			// of silently treating this as success.
+			$snippet = preg_replace('/\s+/', ' ', strip_tags($response));
+			return array('ok' => false, 'error' => 'Server error: ' . substr(trim($snippet), 0, 200), 'http_code' => $httpCode);
 		}
 		$errMsg = is_array($decoded) && isset($decoded['error']) ? $decoded['error'] : "HTTP $httpCode";
 		return array('ok' => false, 'error' => $errMsg, 'http_code' => $httpCode);
@@ -371,7 +379,7 @@ class SantasListPlugin {
 	}
 
 	private function setOverlayText($model, $message, $color, $font, $fontSize, $position, $pixelsPerSecond, $antiAlias) {
-		if (!$model) return false;
+		if (!$model) return array('ok' => false, 'error' => 'No model configured');
 		$url = $this->localApiBase() . '/overlays/model/' . rawurlencode($model) . '/text';
 		$body = array(
 			'Message'         => $message,
@@ -387,7 +395,7 @@ class SantasListPlugin {
 	}
 
 	private function setOverlayState($model, $state) {
-		if (!$model) return false;
+		if (!$model) return array('ok' => false, 'error' => 'No model configured');
 		$url = $this->localApiBase() . '/overlays/model/' . rawurlencode($model) . '/state';
 		return $this->httpRequest('PUT', $url, array('State' => (int)$state), 5);
 	}
@@ -502,14 +510,17 @@ class SantasListPlugin {
 
 		$label = $listType === self::NICE ? 'NICE' : 'NAUGHTY';
 		$color = $listType === self::NICE ? $this->config['nice_color'] : $this->config['naughty_color'];
+		$errors = array();
 
 		if ($this->config['top_model']) {
-			$this->setOverlayText(
+			$res = $this->setOverlayText(
 				$this->config['top_model'], $label, $color,
 				$this->resolveFontName($this->config['top_font']), $this->config['top_font_size'],
 				'Center', 0, $this->config['top_anti_alias']
 			);
-			$this->setOverlayState($this->config['top_model'], 1);
+			if (!$res['ok']) $errors[] = "top text: {$res['error']}";
+			$res = $this->setOverlayState($this->config['top_model'], 1);
+			if (!$res['ok']) $errors[] = "top enable: {$res['error']}";
 		}
 
 		if ($this->config['bottom_model']) {
@@ -522,19 +533,28 @@ class SantasListPlugin {
 				$position = $this->config['bottom_position'];
 				$pps = $this->config['bottom_pixels_per_second'];
 			}
-			$this->setOverlayText(
+			$res = $this->setOverlayText(
 				$this->config['bottom_model'], $message, $this->config['bottom_text_color'],
 				$this->resolveFontName($this->config['bottom_font']), $this->config['bottom_font_size'],
 				$position, $pps, $this->config['bottom_anti_alias']
 			);
-			$this->setOverlayState($this->config['bottom_model'], 1);
+			if (!$res['ok']) $errors[] = "bottom text: {$res['error']}";
+			$res = $this->setOverlayState($this->config['bottom_model'], 1);
+			if (!$res['ok']) $errors[] = "bottom enable: {$res['error']}";
 		}
 
 		$state = $this->loadState();
 		$state['current_list'] = $listType;
 		$state['last_pushed_at'] = time();
-		$this->saveState($state);
-		$this->log("Pushed display: $listType");
+		if (!empty($errors)) {
+			$state['last_error'] = implode(' | ', $errors);
+			$this->saveState($state);
+			$this->log("Push FAILED for $listType: " . implode(' | ', $errors));
+		} else {
+			$state['last_error'] = null;
+			$this->saveState($state);
+			$this->log("Pushed display: $listType");
+		}
 	}
 
 	/** Turn both overlay zones off (used when the plugin is disabled/uninstalled). */
