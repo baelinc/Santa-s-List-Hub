@@ -34,7 +34,7 @@
 		return name + '  (' + w + '\u00d7' + h + ')';
 	}
 
-	function populateSelect(select, items, currentValue, placeholder) {
+	function populateSelect(select, items, currentValue, placeholder, autoSelectFirst) {
 		select.innerHTML = '';
 		var optEmpty = document.createElement('option');
 		optEmpty.value = '';
@@ -51,7 +51,15 @@
 			}
 			select.appendChild(opt);
 		});
-		if (currentValue) select.value = currentValue;
+		if (currentValue) {
+			select.value = currentValue;
+		} else if (autoSelectFirst && items.length > 0) {
+			// FPP's text renderer has no real "default font" -- an empty
+			// font name fails outright, so pick a real one rather than
+			// leaving this on the blank placeholder.
+			var first = items[0];
+			select.value = typeof first === 'string' ? first : (first.Name || first.name);
+		}
 	}
 
 	function loadModelsAndFonts(cfg) {
@@ -64,13 +72,16 @@
 				if (name) state.modelsByName[name] = { w: m.width || m.Width, h: m.height || m.Height };
 			});
 
-			populateSelect($('#slh-top-model'), state.models, cfg.top_model, 'Choose the label-row overlay model\u2026');
-			populateSelect($('#slh-bottom-model'), state.models, cfg.bottom_model, 'Choose the names-grid overlay model\u2026');
-			populateSelect($('#slh-top-font'), state.fonts, cfg.top_font, 'Default font');
-			populateSelect($('#slh-bottom-font'), state.fonts, cfg.bottom_font, 'Default font');
+			populateSelect($('#slh-top-model'), state.models, cfg.top_model, 'Choose the label-row overlay model\u2026', false);
+			populateSelect($('#slh-bottom-model'), state.models, cfg.bottom_model, 'Choose the names-grid overlay model\u2026', false);
+			populateSelect($('#slh-top-font'), state.fonts, cfg.top_font, 'Default font', true);
+			populateSelect($('#slh-bottom-font'), state.fonts, cfg.bottom_font, 'Default font', true);
 
 			if (state.models.length === 0) {
 				$('#slh-no-models-hint').style.display = 'block';
+			}
+			if (state.fonts.length === 0) {
+				toast('FPP reported no fonts available -- text overlays may fail until at least one font exists.', true);
 			}
 		});
 	}

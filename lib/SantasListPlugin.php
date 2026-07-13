@@ -467,6 +467,28 @@ class SantasListPlugin {
 		return implode("\n", $parts);
 	}
 
+	/**
+	 * FPP's text renderer has no built-in "default font" -- an empty font
+	 * name fails outright ("Could not find font \"\""). If nothing was
+	 * explicitly chosen in Settings, fall back to the first font FPP
+	 * actually reports as available, so the display never silently fails
+	 * just because a font was never picked.
+	 */
+	private function resolveFontName($configuredFont) {
+		if (!empty($configuredFont)) return $configuredFont;
+
+		$fonts = $this->listOverlayFonts();
+		if (!empty($fonts) && isset($fonts[0])) {
+			$first = is_array($fonts[0]) ? ($fonts[0]['Name'] ?? $fonts[0]['name'] ?? null) : $fonts[0];
+			if (!empty($first)) {
+				$this->log("No font configured -- falling back to '$first'.");
+				return $first;
+			}
+		}
+		$this->log('WARNING: no font configured and no fonts reported by FPP -- text overlay will likely fail.');
+		return $configuredFont;
+	}
+
 	/** Push the given list type to both overlay zones. */
 	public function pushDisplay($listType, $cache = null) {
 		if ($cache === null) $cache = $this->loadCache();
@@ -477,7 +499,7 @@ class SantasListPlugin {
 		if ($this->config['top_model']) {
 			$this->setOverlayText(
 				$this->config['top_model'], $label, $color,
-				$this->config['top_font'], $this->config['top_font_size'],
+				$this->resolveFontName($this->config['top_font']), $this->config['top_font_size'],
 				'Center', 0, $this->config['top_anti_alias']
 			);
 			$this->setOverlayState($this->config['top_model'], 1);
@@ -495,7 +517,7 @@ class SantasListPlugin {
 			}
 			$this->setOverlayText(
 				$this->config['bottom_model'], $message, $this->config['bottom_text_color'],
-				$this->config['bottom_font'], $this->config['bottom_font_size'],
+				$this->resolveFontName($this->config['bottom_font']), $this->config['bottom_font_size'],
 				$position, $pps, $this->config['bottom_anti_alias']
 			);
 			$this->setOverlayState($this->config['bottom_model'], 1);
