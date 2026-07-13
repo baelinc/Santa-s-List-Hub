@@ -2,7 +2,10 @@
 
 # fpp-plugin-santaslist uninstall script
 
-. ${FPPDIR}/scripts/common
+FPPDIR="${FPPDIR:-/opt/fpp}"
+if [ -f "${FPPDIR}/scripts/common" ]; then
+	. ${FPPDIR}/scripts/common
+fi
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

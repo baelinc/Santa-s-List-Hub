@@ -2,7 +2,14 @@
 
 # fpp-plugin-santaslist install script
 
-. ${FPPDIR}/scripts/common
+# FPPDIR is normally already exported in the FPP environment, but sudo
+# strips environment variables by default, and this script is also meant to
+# be safely runnable by hand (sudo bash fpp_install.sh). Fall back to FPP's
+# standard install path, and don't hard-fail if scripts/common isn't found.
+FPPDIR="${FPPDIR:-/opt/fpp}"
+if [ -f "${FPPDIR}/scripts/common" ]; then
+	. ${FPPDIR}/scripts/common
+fi
 
 # Self-locate: this script lives in <plugin>/scripts/, so its parent is the
 # real install directory, whatever the folder is actually named on disk
