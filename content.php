@@ -335,9 +335,9 @@
 		<div class="slh-toggle-row" style="margin-top:14px;">
 			<div>
 				<h2 style="margin-bottom:2px;">Keep FPP actively playing</h2>
-				<p class="slh-hint" style="margin:0;">Overlays only render on top of active output. If FPP is ever sitting idle, this
-					auto-starts a minimal looping blank playlist so your panels stay lit. It never touches anything if a real
-					playlist or sequence is already playing.</p>
+				<p class="slh-hint" style="margin:0;">Overlays only render on top of continuous active output. If FPP is ever sitting idle, this
+					drives a solid black test-mode output across your panel's channels so there's something continuous for the
+					overlay to render onto. It automatically stops the instant a real playlist or sequence starts playing.</p>
 			</div>
 			<label class="slh-switch">
 				<input type="checkbox" id="slh-keep-alive">

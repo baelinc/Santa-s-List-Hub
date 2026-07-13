@@ -9,7 +9,7 @@ fi
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-php -r "require '${PLUGIN_DIR}/lib/SantasListPlugin.php'; \$p = new SantasListPlugin(); \$p->stopDaemon(); \$p->disableZones();" 2>/dev/null
+php -r "require '${PLUGIN_DIR}/lib/SantasListPlugin.php'; \$p = new SantasListPlugin(); \$p->stopDaemon(); \$p->disableZones(); \$p->stopContinuousOutput();" 2>/dev/null
 
 sudo rm -f /etc/cron.d/fpp-plugin-santaslist-cron
 rm -f /home/fpp/media/scripts/santaslist-enable.sh /home/fpp/media/scripts/santaslist-disable.sh

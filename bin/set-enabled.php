@@ -25,13 +25,14 @@ $plugin = new SantasListPlugin();
 $plugin->saveConfig(array('enabled' => $turnOn));
 
 if ($turnOn) {
-	$plugin->ensureKeepAlivePlaylist();
+	$plugin->ensureContinuousOutput();
 	$plugin->startDaemon();
 	$plugin->log('Display turned ON via scheduled script.');
 	echo "Santa's List Hub display enabled.\n";
 } else {
 	$plugin->stopDaemon();
 	$plugin->disableZones();
+	$plugin->stopContinuousOutput();
 	$plugin->log('Display turned OFF via scheduled script.');
 	echo "Santa's List Hub display disabled.\n";
 }

@@ -176,11 +176,12 @@ function santaslistSaveSettings() {
 	$cache = $plugin->pullNames();
 
 	if ($plugin->config['enabled']) {
-		$plugin->ensureKeepAlivePlaylist();
+		$plugin->ensureContinuousOutput();
 		$plugin->startDaemon();
 	} else {
 		$plugin->stopDaemon();
 		$plugin->disableZones();
+		$plugin->stopContinuousOutput();
 	}
 
 	$cfg = $plugin->config;
@@ -200,7 +201,7 @@ function santaslistRefresh() {
 		return json(array('ok' => false, 'error' => $state['last_error'] ?? 'Unable to reach the hub.'));
 	}
 	if ($plugin->config['enabled']) {
-		$plugin->ensureKeepAlivePlaylist();
+		$plugin->ensureContinuousOutput();
 		$plugin->pushDisplay($plugin->currentListType(), $cache);
 	}
 	return json(array('ok' => true, 'cache' => $cache));

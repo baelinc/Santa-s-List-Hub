@@ -33,7 +33,7 @@ while (true) {
 	// sitting idle. Throttled -- this only needs occasional checking, not
 	// every loop iteration.
 	if (time() - $lastKeepAliveCheck >= 30) {
-		$plugin->ensureKeepAlivePlaylist();
+		$plugin->ensureContinuousOutput();
 		$lastKeepAliveCheck = time();
 	}
 

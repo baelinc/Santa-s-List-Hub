@@ -321,46 +321,53 @@ class SantasListPlugin {
 
 	/**
 	 * Pixel overlays only render on top of active output -- FPP produces no
-	 * frames at all while idle, so the overlay never appears. If nothing is
-	 * playing, start a minimal looping "pause" playlist (creating it once if
-	 * needed) purely to keep fppd actively outputting. If something else is
-	 * already playing, this does nothing, so it never interrupts a real show.
+	 * frames at all while idle, so the overlay never appears. A bare "pause"
+	 * playlist item keeps fppd's status out of "idle" but doesn't reliably
+	 * drive a continuous per-frame output stream, which some receiver
+	 * hardware needs to hold a stable link. FPP's test-mode system does
+	 * drive real continuous output without needing any pre-built sequence
+	 * asset, so that's used instead: a solid-black fill across the channel
+	 * range covered by our two overlay models.
 	 */
-	public function ensureKeepAlivePlaylist() {
+	public function ensureContinuousOutput() {
 		if (empty($this->config['keep_alive_enabled'])) return;
 
 		$status = $this->fppdStatusName();
 		if ($status === null) return; // couldn't reach fppd, don't guess
-		if ($status !== 'idle') return; // something is already playing -- leave it alone
 
-		$name = self::KEEPALIVE_PLAYLIST;
+		if ($status !== 'idle') {
+			// Something real is playing (or about to) -- make sure test
+			// mode isn't left on from a previous idle period, since it
+			// would otherwise block real output.
+			$this->stopContinuousOutput();
+			return;
+		}
 
-		// Always (re)write the playlist content before starting it, rather
-		// than trying to detect "already exists" first -- FPP's GET can
-		// return a valid-looking empty stub for a playlist that doesn't
-		// really exist yet, which made the old exists-check unreliable and
-		// left the playlist empty. This is cheap and self-healing.
-		$playlist = array(
-			'name' => $name,
-			'leadIn' => array(),
-			'mainPlaylist' => array(
-				array('type' => 'pause', 'enabled' => 1, 'playOnce' => 0, 'duration' => 3600),
-			),
-			'leadOut' => array(),
-			'playlistInfo' => array('total_duration' => 3600, 'total_items' => 1),
+		$maxChannel = 0;
+		foreach ($this->listOverlayModels() as $m) {
+			$start = (int)($m['StartChannel'] ?? 0);
+			$count = (int)($m['ChannelCount'] ?? 0);
+			if ($start + $count - 1 > $maxChannel) $maxChannel = $start + $count - 1;
+		}
+		if ($maxChannel <= 0) $maxChannel = 100000; // safe generous fallback if models weren't readable
+
+		$body = array(
+			'enabled' => 1,
+			'mode' => 'RGBFill',
+			'color1' => 0, 'color2' => 0, 'color3' => 0, // solid black
+			'channelSet' => '1-' . $maxChannel,
+			'channelSetType' => 'channelRange',
 		);
-		$res = $this->httpRequest('POST', $this->localApiBase() . '/playlist/' . rawurlencode($name), $playlist, 5);
-		if (!$res['ok']) {
-			$this->log('Failed to write keep-alive playlist: ' . $res['error']);
-			return;
+		$res = $this->httpRequest('POST', $this->localApiBase() . '/testmode', $body, 5);
+		if ($res['ok']) {
+			$this->log("fppd was idle -- started continuous black output (channels 1-$maxChannel) so overlays render.");
+		} else {
+			$this->log('Failed to start continuous-output test mode: ' . $res['error']);
 		}
+	}
 
-		$startRes = $this->httpRequest('GET', $this->localApiBase() . '/playlist/' . rawurlencode($name) . '/start/1', null, 5);
-		if (!$startRes['ok']) {
-			$this->log('Failed to start keep-alive playlist: ' . $startRes['error']);
-			return;
-		}
-		$this->log('fppd was idle -- started keep-alive playlist.');
+	public function stopContinuousOutput() {
+		$this->httpRequest('POST', $this->localApiBase() . '/testmode', array('enabled' => 0), 5);
 	}
 
 	private function setOverlayText($model, $message, $color, $font, $fontSize, $position, $pixelsPerSecond, $antiAlias) {
