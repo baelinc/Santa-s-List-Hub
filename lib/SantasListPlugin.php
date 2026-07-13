@@ -334,20 +334,32 @@ class SantasListPlugin {
 		if ($status !== 'idle') return; // something is already playing -- leave it alone
 
 		$name = self::KEEPALIVE_PLAYLIST;
-		$check = $this->httpRequest('GET', $this->localApiBase() . '/playlist/' . rawurlencode($name), null, 4);
-		if (!$check['ok']) {
-			$playlist = array(
-				'name' => $name,
-				'mainPlaylist' => array(
-					array('type' => 'pause', 'enabled' => 1, 'playOnce' => 0, 'duration' => 3600),
-				),
-				'playlistInfo' => array('total_duration' => 3600, 'total_items' => 1),
-			);
-			$this->httpRequest('POST', $this->localApiBase() . '/playlist/' . rawurlencode($name), $playlist, 5);
-			$this->log('Created keep-alive playlist so overlays have something to render onto while idle.');
+
+		// Always (re)write the playlist content before starting it, rather
+		// than trying to detect "already exists" first -- FPP's GET can
+		// return a valid-looking empty stub for a playlist that doesn't
+		// really exist yet, which made the old exists-check unreliable and
+		// left the playlist empty. This is cheap and self-healing.
+		$playlist = array(
+			'name' => $name,
+			'leadIn' => array(),
+			'mainPlaylist' => array(
+				array('type' => 'pause', 'enabled' => 1, 'playOnce' => 0, 'duration' => 3600),
+			),
+			'leadOut' => array(),
+			'playlistInfo' => array('total_duration' => 3600, 'total_items' => 1),
+		);
+		$res = $this->httpRequest('POST', $this->localApiBase() . '/playlist/' . rawurlencode($name), $playlist, 5);
+		if (!$res['ok']) {
+			$this->log('Failed to write keep-alive playlist: ' . $res['error']);
+			return;
 		}
 
-		$this->httpRequest('GET', $this->localApiBase() . '/playlist/' . rawurlencode($name) . '/start/1', null, 5);
+		$startRes = $this->httpRequest('GET', $this->localApiBase() . '/playlist/' . rawurlencode($name) . '/start/1', null, 5);
+		if (!$startRes['ok']) {
+			$this->log('Failed to start keep-alive playlist: ' . $startRes['error']);
+			return;
+		}
 		$this->log('fppd was idle -- started keep-alive playlist.');
 	}
 
